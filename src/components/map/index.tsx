@@ -147,20 +147,30 @@ export const MapComponent = () => {
     latitude: center[1],
     zoom: zoom_initial,
   });
-  const [currentMapStyle, setCurrentMapStyle] = useState<MapStyleType>(
-    getInitialMapStyle(style)
-  );
+  const envVectorStyleUrl = import.meta.env.VITE_VECTOR_STYLE_URL;
+
+  const [currentMapStyle, setCurrentMapStyle] = useState<MapStyleType>(() => {
+    // 如果 URL 没有强制指定 ?style=xxx，且 .env 配置了矢量样式，默认激活 custom 模式
+    if (!style && envVectorStyleUrl) {
+      return 'custom';
+    }
+    return getInitialMapStyle(style);
+  });
   const [customStyleData, setCustomStyleData] =
     useState<maplibregl.StyleSpecification | null>(() => getCustomStyle());
 
   const resolvedMapStyle = useMemo(() => {
     if (currentMapStyle === 'custom') {
-      return customStyleData ?? getMapStyleUrl('shortbread');
+      // 优先使用界面上传的 customStyleData，其次使用 .env 的 Martin 样式地址，最后回退到默认底图
+      return (
+        customStyleData ?? envVectorStyleUrl ?? getMapStyleUrl('shortbread')
+      );
     }
     return getMapStyleUrl(currentMapStyle);
   }, [
     currentMapStyle,
     customStyleData,
+    envVectorStyleUrl,
   ]) as unknown as maplibregl.StyleSpecification;
 
   const mapRef = useRef<MapRef>(null);
