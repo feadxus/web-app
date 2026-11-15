@@ -20,8 +20,18 @@ export const MAP_STYLE_STORAGE_KEY = 'selectedMapStyle';
 export const CUSTOM_STYLE_STORAGE_KEY = 'customMapStyle';
 
 const assetPath = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+const vectorStyleUrl = import.meta.env.VITE_VECTOR_STYLE_URL;
 
 export const MAP_STYLES = [
+  ...(vectorStyleUrl
+    ? [
+        {
+          id: 'martin',
+          label: 'Martin',
+          style: vectorStyleUrl,
+        } as const,
+      ]
+    : []),
   {
     id: 'shortbread',
     label: 'Shortbread',
